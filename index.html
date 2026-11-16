@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Little Planner</title>
+  <style>
+    :root {
+      --sage: #87977a;
+      --sage-dark: #52634b;
+      --sage-light: #e8ede3;
+      --cream: #f7f6f0;
+      --paper: #fffefa;
+      --ink: #30392e;
+      --muted: #788073;
+      --line: #e5e8df;
+      --rose: #bc8175;
+      --shadow: 0 12px 35px rgba(58, 69, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 18px;
+      background:
+        radial-gradient(ellipse at top left, #e8ede3 0, transparent 38%),
+        var(--cream);
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      margin: 0 0 26px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--sage-dark);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--sage-dark);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.2rem, 6vw, 3.5rem);
+      font-weight: 500;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .left-column {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      padding: 22px;
+      border: 1px solid rgba(135, 151, 122, 0.15);
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .card-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--sage-dark);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.55rem;
+      font-weight: 500;
+    }
+
+    .date-picker {
+      width: auto;
+      max-width: 150px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--cream);
+      color: var(--ink);
+    }
+
+    .add-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .add-form input[type="text"],
+    .add-form input[type="date"],
+    .add-form input[type="time"] {
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      outline: none;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .add-form input:focus {
+      border-color: var(--sage);
+      box-shadow: 0 0 0 3px rgba(135, 151, 122, 0.15);
+    }
+
+    .task-form input[type="text"] {
+      flex: 1;
+    }
+
+    .primary-button {
+      flex: 0 0 auto;
+      padding: 10px 15px;
+      border: 0;
+      border-radius: 11px;
+      background: var(--sage);
+      color: white;
+      cursor: pointer;
+      font-weight: 650;
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-1px);
+      background: var(--sage-dark);
+    }
+
+    .item-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .list-item.done .item-text {
+      color: #9a9f94;
+      text-decoration: line-through;
+    }
+
+    .list-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+      accent-color: var(--sage);
+      cursor: pointer;
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-text {
+      overflow-wrap: anywhere;
+    }
+
+    .item-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .delete-button {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #9a8178;
+      cursor: pointer;
+    }
+
+    .delete-button:hover {
+      background: #f8eeeb;
+      color: var(--rose);
+    }
+
+    .empty-state {
+      margin: 0;
+      padding: 14px 10px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    /* Calendar */
+    .calendar-card {
+      min-height: 100%;
+    }
+
+    .month-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .month-controls h2 {
+      min-width: 140px;
+      text-align: center;
+      font-size: 1.25rem;
+    }
+
+    .month-button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      color: var(--sage-dark);
+      cursor: pointer;
+    }
+
+    .month-button:hover {
+      background: var(--sage-light);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .weekday {
+      padding: 7px 0;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .calendar-day,
+    .blank-day {
+      min-width: 0;
+      aspect-ratio: 1 / 0.9;
+    }
+
+    .calendar-day {
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 4px;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .calendar-day:hover {
+      border-color: var(--sage);
+      background: var(--sage-light);
+    }
+
+    .calendar-day.today {
+      border-color: var(--sage);
+      color: var(--sage-dark);
+      font-weight: 700;
+    }
+
+    .calendar-day.selected {
+      background: var(--sage);
+      color: white;
+      font-weight: 700;
+    }
+
+    .calendar-day.has-event::after {
+      position: absolute;
+      bottom: 5px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--rose);
+      content: "";
+    }
+
+    .calendar-day.selected.has-event::after {
+      background: white;
+    }
+
+    .calendar-divider {
+      height: 1px;
+      margin: 18px 0;
+      border: 0;
+      background: var(--line);
+    }
+
+    .selected-day-title {
+      margin: 0 0 11px;
+      color: var(--sage-dark);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .event-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+    }
+
+    .event-form input[type="text"] {
+      grid-column: 1 / -1;
+    }
+
+    .event-form input[type="date"] {
+      width: 100%;
+    }
+
+    .event-form input[type="time"] {
+      width: 100%;
+    }
+
+    .event-form .primary-button {
+      padding-inline: 12px;
+    }
+
+    .reminder-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 145px;
+    }
+
+    .reminder-form input[type="text"] {
+      grid-column: 1 / -1;
+    }
+
+    .reminder-form input[type="date"] {
+      width: 100%;
+    }
+
+    .reminder-form input[type="time"] {
+      grid-column: 1 / 2;
+      width: 100%;
+    }
+
+    .reminder-form .primary-button {
+      grid-column: 2 / 3;
+      grid-row: 2 / 4;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 22px 13px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .card {
+        padding: 17px;
+      }
+
+      .event-form {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .event-form .primary-button {
+        grid-column: 1 / -1;
+      }
+
+      .reminder-form {
+        grid-template-columns: 1fr;
+      }
+
+      .reminder-form input[type="text"],
+      .reminder-form .primary-button {
+        grid-column: 1;
+      }
+
+      .reminder-form .primary-button {
+        grid-row: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <p class="eyebrow">A little space for your plans</p>
+      <h1>My Little Planner</h1>
+      <p class="subtitle">Take it one lovely day at a time.</p>
+    </header>
+
+    <div class="layout">
+      <div class="left-column">
+        <section class="card" aria-labelledby="tasks-heading">
+          <div class="card-heading">
+            <h2 id="tasks-heading">Daily to-do list</h2>
+            <input id="taskDate" class="date-picker" type="date" aria-label="Choose a day for your tasks">
+          </div>
+
+          <form id="taskForm" class="add-form task-form">
+            <input id="taskInput" type="text" placeholder="Add a task for the day…" maxlength="120" required>
+            <button class="primary-button" type="submit">Add</button>
+          </form>
+          <ul id="taskList" class="item-list"></ul>
+        </section>
+
+        <section class="card" aria-labelledby="reminders-heading">
+          <div class="card-heading">
+            <h2 id="reminders-heading">Reminders</h2>
+          </div>
+
+          <form id="reminderForm" class="add-form reminder-form">
+            <input id="reminderInput" type="text" placeholder="What do you need to remember?" maxlength="120" required>
+            <input id="reminderDate" type="date" aria-label="Reminder date">
+            <input id="reminderTime" type="time" aria-label="Reminder time">
+            <button class="primary-button" type="submit">Add reminder</button>
+          </form>
+          <ul id="reminderList" class="item-list"></ul>
+        </section>
+      </div>
+
+      <section class="card calendar-card" aria-labelledby="calendar-heading">
+        <div class="card-heading">
+          <h2 id="calendar-heading">Little calendar</h2>
+          <div class="month-controls">
+            <button id="prevMonth" class="month-button" type="button" aria-label="Previous month">‹</button>
+            <h2 id="monthLabel" aria-live="polite"></h2>
+            <button id="nextMonth" class="month-button" type="button" aria-label="Next month">›</button>
+          </div>
+        </div>
+
+        <div id="calendarGrid" class="calendar-grid" aria-label="Calendar"></div>
+
+        <hr class="calendar-divider">
+
+        <p id="selectedDayTitle" class="selected-day-title"></p>
+        <form id="eventForm" class="add-form event-form">
+          <input id="eventInput" type="text" placeholder="Add an event for this day…" maxlength="120" required>
+          <input id="eventDate" type="date" aria-label="Event date" required>
+          <input id="eventTime" type="time" aria-label="Event time">
+          <button class="primary-button" type="submit">Add event</button>
+        </form>
+        <ul id="eventList" class="item-list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "my-little-planner-v1";
+
+    function localDateString(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseLocalDate(value) {
+      const [year, month, day] = value.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function readSavedData() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return {
+          tasks: Array.isArray(saved?.tasks) ? saved.tasks : [],
+          reminders: Array.isArray(saved?.reminders) ? saved.reminders : [],
+          events: Array.isArray(saved?.events) ? saved.events : []
+        };
+      } catch {
+        return { tasks: [], reminders: [], events: [] };
+      }
+    }
+
+    const data = readSavedData();
+    const today = localDateString();
+    let selectedDate = today;
+    let visibleMonth = new Date();
+    visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1);
+
+    const taskDate = document.getElementById("taskDate");
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
+
+    const reminderForm = document.getElementById("reminderForm");
+    const reminderInput = document.getElementById("reminderInput");
+    const reminderDate = document.getElementById("reminderDate");
+    const reminderTime = document.getElementById("reminderTime");
+    const reminderList = document.getElementById("reminderList");
+
+    const eventForm = document.getElementById("eventForm");
+    const eventInput = document.getElementById("eventInput");
+    const eventDate = document.getElementById("eventDate");
+    const eventTime = document.getElementById("eventTime");
+    const eventList = document.getElementById("eventList");
+
+    taskDate.value = today;
+    eventDate.value = today;
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+      return parseLocalDate(value).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function formatTime(value) {
+      if (!value) return "";
+      const [hour, minute] = value.split(":").map(Number);
+      const date = new Date();
+      date.setHours(hour, minute, 0, 0);
+      return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    }
+
+    function makeEmptyMessage(text) {
+      const message = document.createElement("li");
+      message.className = "empty-state";
+      message.textContent = text;
+      return message;
+    }
+
+    function makeListItem(item, options) {
+      const { checked, onToggle, meta, onDelete } = options;
+      const li = document.createElement("li");
+      li.className = `list-item${checked ? " done" : ""}`;
+
+      if (onToggle) {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = checked;
+        checkbox.setAttribute("aria-label", `Mark ${item.text} ${checked ? "incomplete" : "complete"}`);
+        checkbox.addEventListener("change", onToggle);
+        li.appendChild(checkbox);
+      }
+
+      const content = document.createElement("div");
+      content.className = "item-content";
+
+      const text = document.createElement("div");
+      text.className = "item-text";
+      text.textContent = item.text;
+      content.appendChild(text);
+
+      if (meta) {
+        const detail = document.createElement("div");
+        detail.className = "item-meta";
+        detail.textContent = meta;
+        content.appendChild(detail);
+      }
+
+      li.appendChild(content);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "delete-button";
+      deleteButton.textContent = "Remove";
+      deleteButton.setAttribute("aria-label", `Remove ${item.text}`);
+      deleteButton.addEventListener("click", onDelete);
+      li.appendChild(deleteButton);
+
+      return li;
+    }
+
+    function renderTasks() {
+      taskList.replaceChildren();
+      const todaysTasks = data.tasks.filter(task => task.date === selectedDate);
+
+      if (!todaysTasks.length) {
+        taskList.appendChild(makeEmptyMessage("Nothing on your list yet. Enjoy the breathing room."));
+        return;
+      }
+
+      todaysTasks.forEach(task => {
+        taskList.appendChild(makeListItem(task, {
+          checked: task.done,
+          onToggle: () => {
+            task.done = !task.done;
+            saveData();
+            renderTasks();
+          },
+          onDelete: () => {
+            data.tasks = data.tasks.filter(item => item.id !== task.id);
+            saveData();
+            renderTasks();
+          }
+        }));
+      });
+    }
+
+    function renderReminders() {
+      reminderList.replaceChildren();
+      const reminders = [...data.reminders].sort((a, b) => {
+        const dateA = `${a.date || "9999-12-31"} ${a.time || "23:59"}`;
+        const dateB = `${b.date || "9999-12-31"} ${b.time || "23:59"}`;
+        return dateA.localeCompare(dateB);
+      });
+
+      if (!reminders.length) {
+        reminderList.appendChild(makeEmptyMessage("No reminders yet."));
+        return;
+      }
+
+      reminders.forEach(reminder => {
+        const details = [formatDate(reminder.date), formatTime(reminder.time)].filter(Boolean).join(" · ");
+        reminderList.appendChild(makeListItem(reminder, {
+          checked: reminder.done,
+          meta: details || "",
+          onToggle: () => {
+            reminder.done = !reminder.done;
+            saveData();
+            renderReminders();
+          },
+          onDelete: () => {
+            data.reminders = data.reminders.filter(item => item.id !== reminder.id);
+            saveData();
+            renderReminders();
+          }
+        }));
+      });
+    }
+
+    function renderEvents() {
+      const day = parseLocalDate(selectedDate);
+      document.getElementById("selectedDayTitle").textContent =
+        `Events for ${day.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}`;
+
+      eventDate.value = selectedDate;
+      eventList.replaceChildren();
+
+      const events = data.events
+        .filter(event => event.date === selectedDate)
+        .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+
+      if (!events.length) {
+        eventList.appendChild(makeEmptyMessage("No events planned for this day."));
+        return;
+      }
+
+      events.forEach(event => {
+        eventList.appendChild(makeListItem(event, {
+          checked: false,
+          meta: formatTime(event.time),
+          onDelete: () => {
+            data.events = data.events.filter(item => item.id !== event.id);
+            saveData();
+            renderCalendar();
+            renderEvents();
+          }
+        }));
+      });
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById("calendarGrid");
+      grid.replaceChildren();
+
+      document.getElementById("monthLabel").textContent =
+        visibleMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach(name => {
+        const label = document.createElement("div");
+        label.className = "weekday";
+        label.textContent = name;
+        grid.appendChild(label);
+      });
+
+      const year = visibleMonth.getFullYear();
+      const month = visibleMonth.getMonth();
+      const firstWeekday = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstWeekday; i++) {
+        const blank = document.createElement("div");
+        blank.className = "blank-day";
+        grid.appendChild(blank);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateValue = localDateString(date);
+        const hasEvent = data.events.some(event => event.date === dateValue);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "calendar-day";
+        button.textContent = day;
+        button.setAttribute("aria-label", date.toLocaleDateString(undefined, {
+          weekday: "long", month: "long", day: "numeric", year: "numeric"
+        }));
+
+        if (dateValue === today) button.classList.add("today");
+        if (dateValue === selectedDate) button.classList.add("selected");
+        if (hasEvent) button.classList.add("has-event");
+
+        button.addEventListener("click", () => {
+          selectedDate = dateValue;
+          taskDate.value = selectedDate;
+          renderTasks();
+          renderCalendar();
+          renderEvents();
+        });
+
+        grid.appendChild(button);
+      }
+    }
+
+    taskDate.addEventListener("change", () => {
+      if (!taskDate.value) return;
+      selectedDate = taskDate.value;
+      visibleMonth = new Date(
+        parseLocalDate(selectedDate).getFullYear(),
+        parseLocalDate(selectedDate).getMonth(),
+        1
+      );
+      renderTasks();
+      renderCalendar();
+      renderEvents();
+    });
+
+    taskForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const text = taskInput.value.trim();
+      if (!text) return;
+
+      data.tasks.push({
+        id: crypto.randomUUID(),
+        text,
+        date: selectedDate,
+        done: false
+      });
+
+      saveData();
+      taskInput.value = "";
+      renderTasks();
+      taskInput.focus();
+    });
+
+    reminderForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const text = reminderInput.value.trim();
+      if (!text) return;
+
+      data.reminders.push({
+        id: crypto.randomUUID(),
+        text,
+        date: reminderDate.value,
+        time: reminderTime.value,
+        done: false
+      });
+
+      saveData();
+      reminderInput.value = "";
+      reminderDate.value = "";
+      reminderTime.value = "";
+      renderReminders();
+      reminderInput.focus();
+    });
+
+    eventForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const text = eventInput.value.trim();
+      if (!text || !eventDate.value) return;
+
+      data.events.push({
+        id: crypto.randomUUID(),
+        text,
+        date: eventDate.value,
+        time: eventTime.value
+      });
+
+      selectedDate = eventDate.value;
+      const selected = parseLocalDate(selectedDate);
+      visibleMonth = new Date(selected.getFullYear(), selected.getMonth(), 1);
+
+      saveData();
+      eventInput.value = "";
+      eventTime.value = "";
+      renderCalendar();
+      renderEvents();
+      renderTasks();
+      eventInput.focus();
+    });
+
+    document.getElementById("prevMonth").addEventListener("click", () => {
+      visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
+      renderCalendar();
+    });
+
+    document.getElementById("nextMonth").addEventListener("click", () => {
+      visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
+      renderCalendar();
+    });
+
+    renderTasks();
+    renderReminders();
+    renderCalendar();
+    renderEvents();
+  </script>
+</body>
+</html>
